@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Look : MonoBehaviour
+public class LookAtThis : MonoBehaviour
 {
     [Header("References")]
 
@@ -11,6 +11,8 @@ public class Look : MonoBehaviour
 
     [SerializeField] Transform cam = null;
     [SerializeField] Transform orientation = null;
+
+    [SerializeField]InputManager inputManager;
 
     float mouseX;
     float mouseY;
@@ -24,12 +26,14 @@ public class Look : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        inputManager = InputManager.Instance; 
     }
 
     private void Update()
     {
-        mouseX = Input.GetAxisRaw("Mouse X");
-        mouseY = Input.GetAxisRaw("Mouse Y");
+        Vector2 lookDir = inputManager.GetPlayerLook();
+        mouseX = lookDir.x;
+        mouseY = lookDir.y;
          
         yRotation += mouseX * sensX * multiplier;
         xRotation -= mouseY * sensY * multiplier;

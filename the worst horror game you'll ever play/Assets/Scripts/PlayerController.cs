@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Movement : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     float playerHeight = 2f;
 
@@ -12,17 +12,14 @@ public class Movement : MonoBehaviour
     [SerializeField] float moveSpeed = 6f;
     [SerializeField] float airMultiplier = 0.4f;
     float movementMultiplier = 10f;
+    [SerializeField]InputManager inputManager;
 
     [Header("Sprinting")]
     [SerializeField] float walkSpeed = 4f;
     [SerializeField] float sprintSpeed = 6f;
     [SerializeField] float acceleration = 10f;
 
-    [Header("Jumping")]
-    public float jumpForce = 5f;
-
     [Header("Keybinds")]
-    [SerializeField] KeyCode jumpKey = KeyCode.Space;
     [SerializeField] KeyCode sprintKey = KeyCode.LeftShift;
     [SerializeField] KeyCode crouchKey = KeyCode.C;
 
@@ -71,6 +68,7 @@ public class Movement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
+        inputManager = InputManager.Instance; 
     }
 
     private void Update()
@@ -81,35 +79,21 @@ public class Movement : MonoBehaviour
         ControlDrag();
         ControlSpeed();
         Crouch();
-
-        if (Input.GetKeyDown(jumpKey) && isGrounded)
-        {
-            Jump();
-        }
-
         slopeMoveDirection = Vector3.ProjectOnPlane(moveDirection, slopeHit.normal);
     }
 
     void MyInput()
     {
-        horizontalMovement = Input.GetAxisRaw("Horizontal");
-        verticalMovement = Input.GetAxisRaw("Vertical");
+        Vector2 movement = inputManager.GetPlayerMovement();
+        horizontalMovement = movement.x;
+        verticalMovement = movement.y;
 
         moveDirection = orientation.forward * verticalMovement + orientation.right * horizontalMovement;
     }
 
-    void Jump()
-    {
-        if (isGrounded)
-        {
-            rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
-            rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
-        }
-    }
-
     void ControlSpeed()
     {
-        if (Input.GetKey(sprintKey) && isGrounded)
+        if (inputManager.PlayerSprinting() && isGrounded)
         {
             moveSpeed = Mathf.Lerp(moveSpeed, sprintSpeed, acceleration * Time.deltaTime);
         }
@@ -154,7 +138,7 @@ public class Movement : MonoBehaviour
 
     void Crouch()
     {
-        if (Input.GetKey(crouchKey))
+        if (inputManager.PlayerCrouching())
         {
             transform.localScale = Vector3.Lerp(transform.localScale, crouchScale, crouchSpeed * Time.deltaTime);
             movementMultiplier = 6f;
