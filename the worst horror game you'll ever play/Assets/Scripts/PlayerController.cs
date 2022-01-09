@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float airMultiplier = 0.4f;
     float movementMultiplier = 10f;
     [SerializeField]InputManager inputManager;
+    [SerializeField]float gravity;
 
     [Header("Sprinting")]
     [SerializeField] float walkSpeed = 4f;
@@ -112,6 +113,7 @@ public class PlayerController : MonoBehaviour
         else
         {
             rb.drag = airDrag;
+            rb.AddForce(Vector3.down * gravity * rb.mass);
         }
     }
 
